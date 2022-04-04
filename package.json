@@ -1,0 +1,30 @@
+{
+  "name": "uniswap_contracts",
+  "version": "1.0.0",
+  "description": "uniswap truffle compilation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cheff",
+  "license": "ISC",
+  "dependencies": {
+    "@truffle/contract": "^4.5.3",
+    "@uniswap/default-token-list": "^3.0.0",
+    "@uniswap/governance": "^1.0.2",
+    "@uniswap/liquidity-staker": "^1.0.2",
+    "@uniswap/merkle-distributor": "1.0.1",
+    "@uniswap/redux-multicall": "^1.1.1",
+    "@uniswap/router-sdk": "^1.0.3",
+    "@uniswap/sdk-core": "^3.0.1",
+    "@uniswap/smart-order-router": "^2.5.26",
+    "@uniswap/swap-router-contracts": "^1.2.0",
+    "@uniswap/token-lists": "^1.0.0-beta.27",
+    "@uniswap/v2-core": "1.0.0",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@uniswap/v2-sdk": "^3.0.1",
+    "@uniswap/v3-core": "1.0.0",
+    "@uniswap/v3-periphery": "^1.1.1",
+    "@uniswap/v3-sdk": "^3.8.2"
+  }
+}
