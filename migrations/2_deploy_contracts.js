@@ -8,7 +8,7 @@ const json_pair = require('@uniswap/v2-core/build/UniswapV2Pair.json')
 const json_migrator = require('@uniswap/v2-periphery/build/UniswapV2Migrator.json')
 const json_router1 = require('@uniswap/v2-periphery/build/UniswapV2Router01.json')
 const json_router2 = require('@uniswap/v2-periphery/build/UniswapV2Router02.json')
-//const json_descriptor = require('../build/contracts/NonfungibleTokenPositionDescriptor.json')
+const json_timelock = require('../build/contracts/Timelock.json')
 // v3-periphery
 const json_positionmanager = require('@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json')
 const json_swaprouter = require('@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json')
@@ -30,10 +30,11 @@ const UniswapV2Router02 = contract(json_router2);
 const UniswapV2Migrator = contract(json_migrator);
 const UniswapV3Factory = contract(json_factoryv3);
 //const UniswapV3PoolDeployer = contract(json_v3pool);
+const Timelock = contract(json_timelock);
 // MULTICALL_ADDRESS
 //const UniswapInterfaceMulticall = contract(json_multicall);
 //const NonfungibleTokenPositionDescriptor = contract(json_descriptor);
-const NonfungiblePositionManagerJson = contract(json_positionmanager);
+const NonfungiblePositionManager = contract(json_positionmanager);
 const SwapRouter02 = contract(json_swaprouter02);
 const SwapRouter = contract(json_swaprouter);
 
@@ -48,8 +49,9 @@ UniswapV3Factory.setProvider(this.web3._provider);
 //UniswapInterfaceMulticall.setProvider(this.web3._provider);
 SwapRouter02.setProvider(this.web3._provider);
 SwapRouter.setProvider(this.web3._provider);
-NonfungiblePositionManagerJson.setProvider(this.web3._provider);
+NonfungiblePositionManager.setProvider(this.web3._provider);
 //NonfungibleTokenPositionDescriptor.setProvider(this.web3._provider);
+Timelock.setProvider(this.web3._provider);
 
 //module.exports = function(_deployer, network, accounts) {
 async function doDeploy(_deployer, network, accounts) {
@@ -65,8 +67,8 @@ async function doDeploy(_deployer, network, accounts) {
     await _deployer.deploy(UniswapV2Factory, accounts[0], {from: accounts[0]})
     console.log('V2_FACTORY_ADDRESS '+UniswapV2Factory.address)
     
-    //await _deployer.deploy(UniswapV2Router02, WETH, UniswapV2Factory.address, {from: accounts[0]})
-    //console.log('V2_ROUTER_ADDRESS '+UniswapV2Router02.address)
+    await _deployer.deploy(UniswapV2Router02, WETH, UniswapV2Factory.address, {from: accounts[0]})
+    console.log('V2_ROUTER_ADDRESS '+UniswapV2Router02.address)
 
     await _deployer.deploy(UniswapV3Factory, {from: accounts[0]})
     console.log('V3_FACTORY_ADDRESS '+UniswapV3Factory.address)
@@ -77,21 +79,21 @@ async function doDeploy(_deployer, network, accounts) {
     /**
      * SWAP_ROUTER_ADDRESSES and dependencies
      */    
-    await _deployer.deploy(NonfungiblePositionManagerJson,
+    await _deployer.deploy(NonfungiblePositionManager,
         UniswapV3Factory.address, //v3-factory
         WETH, //_WETH9
         '0x9c7cc58d319BFb7D8970d7D7f55Fe872897E0AdD', //_tokenDescriptor_
         {from: accounts[0]})
-    console.log('NONFUNGIBLEMANAGER '+NonfungiblePositionManagerJson.address)
+    console.log('NONFUNGIBLE_POSITION_MANAGER_ADDRESSES '+NonfungiblePositionManager.address)
     
     await _deployer.deploy(SwapRouter02, 
         UniswapV2Factory.address,  
         UniswapV3Factory.address, 
-        NonfungiblePositionManagerJson.address,
+        NonfungiblePositionManager.address,
         WETH, {from: accounts[0]})
-    console.log('SWAP_ROUTER_ADDRESSES '+SwapRouter02.address)
+    console.log('SWAP_ROUTER_ADDRESSES '+SwapRouter02.address)   
     
-    //await _deployer.deploy(UniswapV2ERC20, {from: accounts[0]})
+    await _deployer.deploy(Timelock, {from: accounts[0]})
 
     // _deployer.deploy(UniswapV2Pair)
     
