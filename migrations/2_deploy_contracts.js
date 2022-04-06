@@ -9,6 +9,10 @@ const json_migrator = require('@uniswap/v2-periphery/build/UniswapV2Migrator.jso
 const json_router1 = require('@uniswap/v2-periphery/build/UniswapV2Router01.json')
 const json_router2 = require('@uniswap/v2-periphery/build/UniswapV2Router02.json')
 const json_timelock = require('../build/contracts/Timelock.json')
+const json_alpha = require('../build/contracts/GovernorAlpha.json')
+const json_govdelegate = require('../build/contracts/GovernorBravoDelegate.json')
+const json_govdelegator = require('../build/contracts/GovernorBravoDelegator.json')
+
 // v3-periphery
 const json_positionmanager = require('@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json')
 const json_swaprouter = require('@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json')
@@ -37,6 +41,9 @@ const Timelock = contract(json_timelock);
 const NonfungiblePositionManager = contract(json_positionmanager);
 const SwapRouter02 = contract(json_swaprouter02);
 const SwapRouter = contract(json_swaprouter);
+const GovernorAlpha = contract(json_alpha);
+const GovernorBravoDelegate = contract(json_govdelegate);
+const GovernorBravoDelegator = contract(json_govdelegator);
 
 UniswapV2Factory.setProvider(this.web3._provider);
 UniswapV2ERC20.setProvider(this.web3._provider);
@@ -52,6 +59,9 @@ SwapRouter.setProvider(this.web3._provider);
 NonfungiblePositionManager.setProvider(this.web3._provider);
 //NonfungibleTokenPositionDescriptor.setProvider(this.web3._provider);
 Timelock.setProvider(this.web3._provider);
+GovernorAlpha.setProvider(this.web3._provider);
+GovernorBravoDelegate.setProvider(this.web3._provider);
+GovernorBravoDelegator.setProvider(this.web3._provider);
 
 //module.exports = function(_deployer, network, accounts) {
 async function doDeploy(_deployer, network, accounts) {
@@ -64,36 +74,45 @@ async function doDeploy(_deployer, network, accounts) {
     //await _deployer.deploy(UniswapInterfaceMulticall, {from: accounts[0]})
     //console.log('MULTICALL_ADDRESS '+UniswapInterfaceMulticall.address)
 
-    await _deployer.deploy(UniswapV2Factory, accounts[0], {from: accounts[0]})
-    console.log('V2_FACTORY_ADDRESS '+UniswapV2Factory.address)
+    //await _deployer.deploy(UniswapV2Factory, accounts[0], {from: accounts[0]})
+    //console.log('V2_FACTORY_ADDRESS '+UniswapV2Factory.address)
     
-    await _deployer.deploy(UniswapV2Router02, WETH, UniswapV2Factory.address, {from: accounts[0]})
-    console.log('V2_ROUTER_ADDRESS '+UniswapV2Router02.address)
+    //await _deployer.deploy(UniswapV2Router02, WETH, UniswapV2Factory.address, {from: accounts[0]})
+    //console.log('V2_ROUTER_ADDRESS '+UniswapV2Router02.address)
 
-    await _deployer.deploy(UniswapV3Factory, {from: accounts[0]})
-    console.log('V3_FACTORY_ADDRESS '+UniswapV3Factory.address)
+    //await _deployer.deploy(UniswapV3Factory, {from: accounts[0]})
+    //console.log('V3_FACTORY_ADDRESS '+UniswapV3Factory.address)
 
-    await _deployer.deploy(SwapRouter, WETH, UniswapV3Factory.address, {from: accounts[0]})
-    console.log('V3_ROUTER_ADDRESS '+SwapRouter.address)
+    //await _deployer.deploy(SwapRouter, WETH, UniswapV3Factory.address, {from: accounts[0]})
+    //console.log('V3_ROUTER_ADDRESS '+SwapRouter.address)
 
     /**
      * SWAP_ROUTER_ADDRESSES and dependencies
      */    
+    /*
     await _deployer.deploy(NonfungiblePositionManager,
         UniswapV3Factory.address, //v3-factory
         WETH, //_WETH9
         '0x9c7cc58d319BFb7D8970d7D7f55Fe872897E0AdD', //_tokenDescriptor_
         {from: accounts[0]})
     console.log('NONFUNGIBLE_POSITION_MANAGER_ADDRESSES '+NonfungiblePositionManager.address)
-    
+    */
+    /*
     await _deployer.deploy(SwapRouter02, 
         UniswapV2Factory.address,  
         UniswapV3Factory.address, 
         NonfungiblePositionManager.address,
         WETH, {from: accounts[0]})
     console.log('SWAP_ROUTER_ADDRESSES '+SwapRouter02.address)   
+    */
+    await _deployer.deploy(GovernorBravoDelegate, {from: accounts[0]});
+    console.log('GOVERNOR_BRAVO_DELEGATE '+GovernorBravoDelegate.address);
     
-    await _deployer.deploy(Timelock, {from: accounts[0]})
+    await _deployer.deploy(Timelock, GovernorBravoDelegate.address, 172800, {from: accounts[0]})
+    console.log('TIMELOCK_ADDRESS '+ Timelock.address)
+
+    await _deployer.deploy(GovernorBravoDelegator, Timelock.address, UNI_ADDRESS, Timelock.address, GovernorBravoDelegate.address, 40320, 13140, BigInt("1000000000000000000000"), {from: accounts[0]});
+    console.log('GOVERNANCE_BRAVO_ADDRESSES '+GovernorBravoDelegator.address);
 
     // _deployer.deploy(UniswapV2Pair)
     
