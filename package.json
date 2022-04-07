@@ -9,6 +9,7 @@
   "author": "cheff",
   "license": "ISC",
   "dependencies": {
+    "@openzeppelin/contracts": "3.4.1-solc-0.7-2",
     "@truffle/contract": "^4.5.3",
     "@truffle/hdwallet-provider": "^2.0.4",
     "@uniswap/default-token-list": "^3.0.0",
