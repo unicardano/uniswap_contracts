@@ -15,6 +15,8 @@ const json_govdelegator = require('../build/contracts/GovernorBravoDelegator.jso
 
 // v3-periphery
 const json_positionmanager = require('@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json')
+const json_quoter = require('@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json')
+const json_ticker = require('@uniswap/v3-periphery/artifacts/contracts/lens/TickLens.sol/TickLens.json')
 const json_swaprouter = require('@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json')
 // v3-core
 const json_factoryv3 = require('@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json')
@@ -22,6 +24,7 @@ const json_factoryv3 = require('@uniswap/v3-core/artifacts/contracts/UniswapV3Fa
 // multicall contract
 //const json_multicall = require('../build/contracts/UniswapInterfaceMulticall.json')
 const json_swaprouter02 = require('@uniswap/swap-router-contracts/artifacts/contracts/SwapRouter02.sol/SwapRouter02.json')
+const json_merkledistributor = require('../build/contracts/MerkleDistributor.json')
 
 const contract = require('@truffle/contract');
 
@@ -44,6 +47,9 @@ const SwapRouter = contract(json_swaprouter);
 const GovernorAlpha = contract(json_alpha);
 const GovernorBravoDelegate = contract(json_govdelegate);
 const GovernorBravoDelegator = contract(json_govdelegator);
+const Quoter = contract(json_quoter);
+const TickLens = contract(json_ticker);
+const MerkleDistributor = contract(json_merkledistributor);
 
 UniswapV2Factory.setProvider(this.web3._provider);
 UniswapV2ERC20.setProvider(this.web3._provider);
@@ -62,14 +68,18 @@ Timelock.setProvider(this.web3._provider);
 GovernorAlpha.setProvider(this.web3._provider);
 GovernorBravoDelegate.setProvider(this.web3._provider);
 GovernorBravoDelegator.setProvider(this.web3._provider);
+Quoter.setProvider(this.web3._provider);
+TickLens.setProvider(this.web3._provider);
+MerkleDistributor.setProvider(this.web3._provider);
 
-//module.exports = function(_deployer, network, accounts) {
 async function doDeploy(_deployer, network, accounts) {
     console.log('NETWORK: '+network)
 
     // DEV: UNI CONTRACT was successfully deployed using Remix
     let UNI_ADDRESS = '0x8d55587602F96811A4B7363a97b21a61B8c8a98A'
     let WETH = '0xD0Fab4aE1ff28825aabD2A16566f89EB8948F9aB'
+    // SEE Readme
+    let MERKEL_ROOT = '0xa633d5c3b92d9680e248c80b4204e5b3ec9ab8b7150ea7cdd76a6373f5c0a65a'
 
     //await _deployer.deploy(UniswapInterfaceMulticall, {from: accounts[0]})
     //console.log('MULTICALL_ADDRESS '+UniswapInterfaceMulticall.address)
@@ -86,6 +96,14 @@ async function doDeploy(_deployer, network, accounts) {
     //await _deployer.deploy(SwapRouter, WETH, UniswapV3Factory.address, {from: accounts[0]})
     //console.log('V3_ROUTER_ADDRESS '+SwapRouter.address)
 
+    //await _deployer.deploy(Quoter, UniswapV3Factory.address, WETH, {from: accounts[0]})
+    //console.log('QUOTER_ADDRESSES '+Quoter.address)
+
+    //await _deployer.deploy(TickLens, {from: accounts[0]})
+    //console.log('TICK_LENS_ADDRESSES ' +TickLens.address)
+
+    await _deployer.deploy(MerkleDistributor, UNI_ADDRESS, MERKEL_ROOT, {from: accounts[0]})
+    console.log('MERKLE_DISTRIBUTOR_ADDRESS '+MerkleDistributor.address)
     /**
      * SWAP_ROUTER_ADDRESSES and dependencies
      */    
@@ -105,15 +123,17 @@ async function doDeploy(_deployer, network, accounts) {
         WETH, {from: accounts[0]})
     console.log('SWAP_ROUTER_ADDRESSES '+SwapRouter02.address)   
     */
-    await _deployer.deploy(GovernorBravoDelegate, {from: accounts[0]});
-    console.log('GOVERNOR_BRAVO_DELEGATE '+GovernorBravoDelegate.address);
     
-    await _deployer.deploy(Timelock, GovernorBravoDelegate.address, 172800, {from: accounts[0]})
-    console.log('TIMELOCK_ADDRESS '+ Timelock.address)
+    //await _deployer.deploy(GovernorBravoDelegate, {from: accounts[0]});
+    //console.log('GOVERNOR_BRAVO_DELEGATE '+GovernorBravoDelegate.address);
+    
+    //await _deployer.deploy(Timelock, GovernorBravoDelegate.address, 172800, {from: accounts[0]})
+    //console.log('TIMELOCK_ADDRESS '+ Timelock.address)
 
-    await _deployer.deploy(GovernorBravoDelegator, Timelock.address, UNI_ADDRESS, Timelock.address, GovernorBravoDelegate.address, 40320, 13140, BigInt("1000000000000000000000"), {from: accounts[0]});
-    console.log('GOVERNANCE_BRAVO_ADDRESSES '+GovernorBravoDelegator.address);
+    //await _deployer.deploy(GovernorBravoDelegator, Timelock.address, UNI_ADDRESS, Timelock.address, GovernorBravoDelegate.address, 40320, 13140, BigInt("1000000000000000000000"), {from: accounts[0]});
+    //console.log('GOVERNANCE_BRAVO_ADDRESSES '+GovernorBravoDelegator.address);
 
+    
     // _deployer.deploy(UniswapV2Pair)
     
     // NEED V1 factory _deployer.deploy(UniswapV2Router02)
